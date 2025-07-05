@@ -1,0 +1,42 @@
+﻿@page "/clientes"
+@using ProjectFlow.Core.Models.DTOs.Customers.Request
+@inherits ListCustomersPage
+
+<PageTitle>Clientes</PageTitle>
+
+<MudText Typo="Typo.h4">Clientes</MudText>
+
+<MudDataGrid T="CustomerRequest"
+             Class="mt-4"
+             ServerData="LoadServerData"
+             @ref="DataGrid"
+             RowsPerPage="@Core.Configuration.DefaultPageSize"
+             RowClick="@(e => SelectCustomer(e.Item))"
+             RowStyle="@RowStyle">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Clientes</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="SearchTerm"
+                      Placeholder="Filtrar por Id, Nome e Documento"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Clearable="true"
+                      OnClearButtonClick="@(() => SearchTerm = "" )"
+                      Immediate="true"
+                      IconSize="Size.Medium"
+                      Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x=>x.Id" Title="Id"></PropertyColumn>
+        <PropertyColumn Property="x=>x.Name" Title="Nome Fantasia"></PropertyColumn>
+        <PropertyColumn Property="x=>x.BusinessName" Title="Razao Social"></PropertyColumn>
+        <PropertyColumn Property="x=>x.DocumentNumber" Title="Documento"></PropertyColumn>
+        <PropertyColumn Property="x=>x.Phone" Title="Telefone"></PropertyColumn>
+        <PropertyColumn Property="x=>x.CellPhone" Title="Celular"></PropertyColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CustomerRequest" />
+    </PagerContent>
+</MudDataGrid>

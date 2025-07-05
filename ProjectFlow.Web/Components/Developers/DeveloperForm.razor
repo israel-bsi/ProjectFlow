@@ -1,0 +1,61 @@
+﻿@using ProjectFlow.Core.Enums
+@inherits DeveloperFormComponent
+
+<PageTitle>@Operation desenvolvedor</PageTitle>
+
+<MudText Typo="Typo.h4">@Operation desenvolvedor</MudText>
+
+@if (IsBusy)
+{
+    <SkeletonWave />
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <MudPaper Class="pa-8 mt-4" Elevation="2">
+            <EditForm Model="InputModel" OnValidSubmit="OnValidSubmitAsync">
+                <DataAnnotationsValidator />
+
+                <MudGrid>
+                    <MudItem lg="12" md="12" xs="12">
+                        <MudTextField T="string"
+                                      Label="Nome"
+                                      @bind-Value="InputModel.Name"
+                                      For="@(() => InputModel.Name)"
+                                      InputType="InputType.Text" />
+                    </MudItem>
+
+                    <MudItem lg="12" md="12" xs="12">
+                        <MudTextField T="string"
+                                      Label="Tecnologias utilizadas"
+                                      @bind-Value="InputModel.Technologies"
+                                      For="@(() => InputModel.Technologies)"
+                                      InputType="InputType.Text" />
+                    </MudItem>
+
+                    <MudItem lg="6" md="6" xs="12">
+                        <EnumSelect TEnum="EDevLevel"
+                                    Label="Nível"
+                                    @bind-SelectedValue="InputModel.DevLevel" />
+                    </MudItem>
+
+                    <MudItem lg="6" md="6" xs="12">
+                        <MudNumericField @bind-Value="InputModel.ExpirienceTime"
+                                     For="@(() => InputModel.ExpirienceTime)"
+                                     Label="Tempo de experiência (anos)" 
+                                     Min="0">
+                        </MudNumericField>
+                    </MudItem>
+                </MudGrid>
+
+                <MudButton Class="mt-4"
+                           ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Save">
+                    Salvar
+                </MudButton>
+            </EditForm>
+        </MudPaper>
+    </MudContainer>
+}

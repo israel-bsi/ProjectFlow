@@ -1,0 +1,248 @@
+﻿@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Models.DTOs.Customers.Request
+@using ProjectFlow.Core.Models.DTOs.Developers.Request
+@inherits ProjectFormComponent
+
+<PageTitle>@Operation projeto</PageTitle>
+
+<MudText Typo="Typo.h4">@Operation projeto</MudText>
+
+@if (IsBusy)
+{
+    <SkeletonWave />
+}
+else
+{
+    <MudPaper Class="pa-8 mt-4" Elevation="2">
+        <EditForm Model="InputModel" OnValidSubmit="OnValidSubmitAsync">
+            <DataAnnotationsValidator />
+            <MudGrid Class="mb-4">
+                <MudItem lg="6" md="6" xs="12">
+                    <MudTextField T="string"
+                                  Label="Título"
+                                  Placeholder="Título do projeto"
+                                  Variant="Variant.Text"
+                                  InputType="InputType.Text"
+                                  @bind-Value="InputModel.Title"
+                                  For="@(() => InputModel.Title)" />
+                </MudItem>
+                <MudItem lg="6" md="6" xs="12">
+                    <MudTextField T="string"
+                                  Label="Solicitante"
+                                  Placeholder="Nome do solicitante"
+                                  Variant="Variant.Text"
+                                  InputType="InputType.Text"
+                                  @bind-Value="InputModel.Requester"
+                                  For="@(() => InputModel.Requester)" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem lg="12" md="12" xs="12">
+                    <MudTextField T="string"
+                                  Label="Descrição"
+                                  Placeholder="Descrição breve do projeto"
+                                  Variant="Variant.Text"
+                                  InputType="InputType.Text"
+                                  @bind-Value="InputModel.Description"
+                                  For="@(() => InputModel.Description)" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Class="mb-4">
+                <MudItem lg="3" md="4" xs="12">
+                    <MudDatePicker Label="Data da solicitação"
+                                   @bind-Date="InputModel.RequestedAt"
+                                   For="@(() => InputModel.RequestedAt)"
+                                   Editable="true" />
+                </MudItem>
+                <MudItem lg="3" md="4" xs="12">
+                    <EnumSelect TEnum="EPaymentStatus"
+                                Label="Status do pagamento"
+                                @bind-SelectedValue="InputModel.PaymentStatus" />
+                </MudItem>
+                <MudItem lg="3" md="4" xs="12">
+                    <EnumSelect TEnum="EProjectStatus"
+                                Label="Status do projeto"
+                                @bind-SelectedValue="InputModel.ProjectStatus" />
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudGrid>
+                <MudItem lg="6" md="6" xs="12">
+                    <MudText Class="mb-2" Typo="Typo.h6">Cliente</MudText>
+                    <div class="d-flex">
+                        <MudTextField Class="mb-2"
+                                      ReadOnly="true"
+                                      Label="@(InputModel.Customer.Id == 0 ? "Clique aqui para pesquisar o cliente" : "Cliente selecionado")"
+                                      AdornmentIcon="@Icons.Material.Filled.PersonSearch"
+                                      @onclick="@OpenCustomerDialog"
+                                      Value="@InputModel.Customer.Name" />
+                        <MudTooltip Text="Limpar cliente">
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                           OnClick="@(() => InputModel.Customer = new CustomerRequest())"
+                                           Color="Color.Error" />
+                        </MudTooltip>
+                    </div>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem lg="8" md="10" xs="12">
+                    <MudText Class="mb-2" Typo="Typo.h6">Desenvolvedores</MudText>
+                    <MudButton Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Search"
+                               OnClick="OpenDevelopersDialog"
+                               Variant="Variant.Outlined">
+                        Adicionar
+                    </MudButton>
+                    @if (InputModel.Developers.Count > 0)
+                    {
+                        <MudButton Class="ml-4" Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   OnClick="@(() => InputModel.Developers = [])">
+                            Limpar
+                        </MudButton>
+                    }
+                    <MudList Class="mt-2" T="DeveloperRequest" ReadOnly="true">
+                        @foreach (var developer in InputModel.Developers)
+                        {
+                            <MudListItem Icon="@Icons.Material.Filled.Person" Text="@developer.Name" />
+                        }
+                    </MudList>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudGrid Class="mb-4">
+                <MudItem lg="4" md="8" xs="12">
+                    <MudText Typo="Typo.h6">Serviços</MudText>
+                </MudItem>
+                @foreach (var service in InputModel.ProjectServices)
+                {
+                    <MudItem lg="12" xs="12" sm="12">
+                        <CascadingValue Value="this">
+                            <ProjectServiceForm InputModel="service" ValueHour="ValueHour"
+                                                @bind-ProjectServices="InputModel.ProjectServices" />
+                        </CascadingValue>
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Button"
+                           Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddService">
+                    Adicionar
+                </MudButton>
+            </MudItem>
+
+            <MudGrid>
+                <MudItem lg="8" md="6" xs="12">
+
+                </MudItem>
+                <MudItem lg="2" md="3" xs="12">
+                    <MudTextField T="int"
+                                  Label="Horas totais"
+                                  Variant="Variant.Text"
+                                  InputType="InputType.Number"
+                                  Value="InputModel.TotalHours"
+                                  ReadOnly="true" />
+                </MudItem>
+                <MudItem lg="2" md="3" xs="12">
+                    <MudTextField T="decimal"
+                                  Label="Valor total"
+                                  Variant="Variant.Text"
+                                  InputType="InputType.Text"
+                                  Value="InputModel.TotalValue"
+                                  Format="C"
+                                  ReadOnly="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudItem lg="1" md="2" xs="12">
+                <MudText Class="my-2" Typo="Typo.h6">Desconto</MudText>
+            </MudItem>
+            <MudGrid>
+                <MudItem xs="12" md="4" lg="2" Class="mt-3">
+                    <MudCheckBox T="bool"
+                                 Value="Discount"
+                                 ValueChanged="OnDiscountChecked">
+                        Desconto
+                    </MudCheckBox>
+                </MudItem>
+                @if (Discount)
+                {
+                    <MudItem xs="12" md="4" lg="2" Class="mt-4">
+                        <EnumSelect TEnum="EDiscountType"
+                                    @bind-SelectedValue="InputModel.DiscountType" />
+                    </MudItem>
+                    <MudItem xs="12" md="4" lg="2">
+                        @if (InputModel.DiscountType == EDiscountType.Percentage)
+                        {
+                            <MudNumericField T="decimal"
+                                             Label="Porcentagem"
+                                             OnBlur="OnBlurDiscountValue"
+                                             AdornmentText="%"
+                                             Adornment="Adornment.Start"
+                                             Min="0"
+                                             @bind-Value="InputModel.DiscountValue" />
+                        }
+                        else
+                        {
+                            <MudNumericField T="decimal"
+                                             Label="Valor"
+                                             OnBlur="OnBlurDiscountValue"
+                                             AdornmentText="R$"
+                                             Adornment="Adornment.Start"
+                                             Variant="Variant.Text"
+                                             @bind-Value="InputModel.DiscountValue"
+                                             Min="0" />
+                        }
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <MudDivider Class="my-4" />
+
+            <MudItem lg="1" md="2" xs="12">
+                <MudText Class="my-2" Typo="Typo.h6">Prazo</MudText>
+            </MudItem>
+            <MudStack Row="true">
+                <MudItem lg="1" md="4" xs="12">
+                    <MudText Typo="Typo.subtitle2">Dias úteis</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.Deadline</MudText>
+                </MudItem>
+                <MudItem lg="3" md="8" xs="12">
+                    <MudNumericField T="int"
+                                     Label="Dias para acrescentar no prazo"
+                                     Variant="Variant.Text"
+                                     InputMode="InputMode.numeric"
+                                     Min="0"
+                                     Value="InputModel.DaysToAddToDeadline"
+                                     ValueChanged="OnDaysToAddToDeadlineChanged"
+                                     For="@(() => InputModel.DaysToAddToDeadline)" />
+                </MudItem>
+            </MudStack>
+
+            <MudDivider Class="my-4" />
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Save"
+                       Class="mt-4">
+                Salvar
+            </MudButton>
+        </EditForm>
+    </MudPaper>
+}

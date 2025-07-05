@@ -1,0 +1,94 @@
+﻿@page "/desenvolvedores"
+@using ProjectFlow.Core.Extension
+@using ProjectFlow.Core.Models.DTOs.Developers.Request
+@inherits ListDevelopersPage
+
+<PageTitle>Desenvolvedores</PageTitle>
+
+<MudText Typo="Typo.h4">Desenvolvedores</MudText>
+
+<div class="d-flex justify-end">
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.AddHome"
+               Href="/desenvolvedores/adicionar">
+        Novo desenvolvedor
+    </MudButton>
+</div>
+
+<MudDataGrid T="DeveloperRequest"
+             Class="mt-4"
+             ServerData="LoadServerData"
+             @ref="DataGrid"
+             RowsPerPage="@Core.Configuration.DefaultPageSize"
+             MultiSelection="@MultiSelection"
+             SelectedItemsChanged="SelectDevelopers"
+             RowStyle="@RowStyle">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Desenvolvedores</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="SearchTerm"
+                      Placeholder="Filtrar por Id, Nome e Nível"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Clearable="true"
+                      OnClearButtonClick="@(() => SearchTerm = "" )"
+                      Immediate="true"
+                      IconSize="Size.Medium"
+                      Class="mt-0">
+        </MudTextField>
+    </ToolBarContent>
+    <Columns>
+        @if (MultiSelection)
+        {
+            <SelectColumn T="DeveloperRequest" />
+        }
+        <PropertyColumn Property="x => x.Id" Title="Id"></PropertyColumn>
+        <PropertyColumn Property="x => x.Name" Title="Nome"></PropertyColumn>
+        <TemplateColumn Title="Nível">
+            <CellTemplate>
+                @context.Item.DevLevel.GetDisplayName()
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Tempo de experiência">
+            <CellTemplate>
+                @context.Item.ExpirienceTime.ToString("N0") anos
+            </CellTemplate>
+        </TemplateColumn>
+        @if (ShowActions)
+        {
+            <TemplateColumn Class="justify-end" Title="Ações">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudTooltip Text="Editar">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           OnClick="() => RedirectToEdit(context.Item)"
+                                           Color="Color.Primary">
+                            </MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Excluir">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           OnClick="() => OnDeleteButtonClickedAsync(context.Item)">
+                            </MudIconButton>
+                        </MudTooltip>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        }
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="DeveloperRequest" />
+    </PagerContent>
+</MudDataGrid>
+@if (ShowConfirmButton)
+{
+    <MudButton Class="mt-4"
+               Variant="Variant.Filled"
+               ButtonType="ButtonType.Button"
+               Color="Color.Primary"
+               OnClick="SendSelectedDevelopers">
+        Confirmar
+    </MudButton>
+}

@@ -1,0 +1,68 @@
+﻿@using ProjectFlow.Core.Extension
+@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Models.DTOs.Projects.Request
+
+@switch (InputModel.PaymentStatus)
+{
+    case EPaymentStatus.Peding:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.PaymentStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+
+    case EPaymentStatus.Partial:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.PaymentStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+
+    case EPaymentStatus.Total:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.PaymentStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+}
+
+@code
+{
+    [Parameter, EditorRequired]
+    public ProjectRequest InputModel { get; set; } = null!;
+
+    private Color ChipColor => InputModel.PaymentStatus switch
+    {
+        EPaymentStatus.Peding => Color.Error,
+        EPaymentStatus.Partial => Color.Info,
+        EPaymentStatus.Total => Color.Success,
+        _ => Color.Default
+    };
+
+    [Inject] public IDialogService DialogService { get; set; } = null!;
+
+    private static EPaymentStatus Status;
+
+    public async Task OpenSelectStatus()
+    {
+        Status = InputModel.PaymentStatus;
+        var parameters = new DialogParameters
+        {
+            { "InputModel", InputModel}
+        };
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+        var dialog = await DialogService
+            .ShowAsync<ProjectPaymentStatusSelectDialog>("Informe o status de pagamento", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: true })
+            InputModel.PaymentStatus = Status;
+    }
+}

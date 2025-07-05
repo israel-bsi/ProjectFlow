@@ -1,0 +1,29 @@
+﻿@using ProjectFlow.Core.Models.DTOs.Customers.Request
+@using ProjectFlow.Web.Pages.Customers
+
+<MudDialog>
+    <DialogContent>
+        <List OnCustomerSelected="SelectCustomer" RowStyle="cursor: pointer" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog" Color="Color.Primary">Fechar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<CustomerRequest> OnCustomerSelected { get; set; }
+
+    void CloseDialog() => MudDialog.Close();
+
+    public async Task SelectCustomer(CustomerRequest customer)
+    {
+        if (OnCustomerSelected.HasDelegate)
+            await OnCustomerSelected.InvokeAsync(customer);
+
+        MudDialog.Close(DialogResult.Ok(customer));
+    }
+}

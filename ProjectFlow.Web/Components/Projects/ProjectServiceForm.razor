@@ -1,0 +1,81 @@
+﻿@using ProjectFlow.Core.Models.DTOs.Projects.Request
+
+<EditForm Model="InputModel">
+    <DataAnnotationsValidator />
+
+    <MudGrid>
+        <MudItem lg="8" md="8" xs="12">
+            <MudTextField T="string"
+            Label="Descrição"
+            Placeholder="Descrição do serviço"
+            @bind-Value="InputModel.Description"
+            For="@(() => InputModel.Description)"
+            AutoGrow="true" />
+        </MudItem>
+
+        <MudItem lg="2" md="2" xs="12">
+            <MudNumericField T="int"
+            Label="Horas"
+            Value="InputModel.Hours"
+            For="@(() => InputModel.Hours)"
+            ValueChanged="ValueChanged" />
+        </MudItem>
+
+        <MudItem lg="2" md="2" xs="12">
+            <div class="d-flex align-items-center">
+                <MudTextField UserAttributes="@(new Dictionary<string, object?>{["tabindex"] = "-1"} )"
+                T="decimal"
+                Label="Valor"
+                @bind-Value="InputModel.Value"
+                ReadOnly="true"
+                Format="C" />
+                <MudTooltip Text="Excluir">
+                    <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                    Color="Color.Error"
+                    OnClick="DeleteService" />
+                </MudTooltip>
+            </div>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code
+{
+    [CascadingParameter]
+    public EditContext CurrentEditContext { get; set; } = null!;
+
+    [CascadingParameter]
+    public ProjectFormComponent Parent { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public ProjectServiceRequest InputModel { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<List<ProjectServiceRequest>> ProjectServicesChanged { get; set; }
+
+    [Parameter]
+    public List<ProjectServiceRequest> ProjectServices { get; set; } = null!;
+
+    [Parameter]
+    public decimal ValueHour { get; set; }
+
+    private void ValueChanged(int newValue)
+    {
+        InputModel.Hours = newValue;
+        InputModel.Value = newValue * ValueHour;
+        StateHasChanged();
+        Parent.RefreshState(ProjectServices);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnParametersSetAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private void DeleteService()
+    {
+        ProjectServices.Remove(InputModel);
+        Parent.RefreshState(ProjectServices);
+    }
+}

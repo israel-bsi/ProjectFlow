@@ -1,0 +1,54 @@
+﻿@page "/configuracoes"
+@inherits SettingsPage
+
+<PageTitle>Configurações</PageTitle>
+
+<MudText Typo="Typo.h4">Configurações</MudText>
+
+@if (IsBusy)
+{
+    <SkeletonWave />
+}
+else
+{
+    <MudPaper Class="pa-8 mt-4">
+        <MudText Typo="Typo.h6" Class="mb-4">
+            Configurações Gerais
+        </MudText>
+        <EditForm FormName="appsettings"
+                  OnValidSubmit="OnValidSubmitAppSettingsAsync"
+                  Model="AppSettings">
+            <DataAnnotationsValidator />
+
+            <MudGrid Spacing="10" Justify="Justify.FlexStart">
+                <MudItem lg="3" md="6" xs="12">
+                    <MudTextField Label="Valor da hora de desenvolvimento"
+                                  T="decimal"
+                                  Variant="Variant.Text"
+                                  Format="C"
+                                  @bind-Value="AppSettings.ValuePerHour"
+                                  For="@(() => AppSettings.ValuePerHour)"
+                                  Immediate="true" />
+                </MudItem>
+
+                <MudItem lg="3" md="6" xs="12">
+                    <MudNumericField Label="Dias para adicionar no prazo de conclusão"
+                                     T="int"
+                                     InputMode="InputMode.numeric"
+                                     Min="0"
+                                     Variant="Variant.Text"
+                                     @bind-Value="AppSettings.DaysToAddOnFinishedDate"
+                                     For="@(() => AppSettings.DaysToAddOnFinishedDate)"
+                                     Immediate="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudButton Class="mt-4"
+                       ButtonType="ButtonType.Submit"
+                       Variant="Variant.Outlined"
+                       Color="Color.Primary">
+                Salvar
+            </MudButton>
+        </EditForm>
+    </MudPaper>
+}

@@ -1,0 +1,14 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="Configuration.Theme"/>
+<MudSnackbarProvider />
+
+<MudLayout>
+    <CascadingValue Value="@Configuration.SrcLogo" Name="LogoCascading">
+        <MudMainContent>
+            <MudContainer>
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </CascadingValue>
+</MudLayout>

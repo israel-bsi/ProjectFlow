@@ -1,0 +1,1 @@
+## Projeto utilizando MVC na Api e Blazor no Frontend

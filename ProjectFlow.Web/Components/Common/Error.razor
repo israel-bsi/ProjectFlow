@@ -1,0 +1,18 @@
+﻿<PageTitle>Erro</PageTitle>
+
+<MudPaper Class="pa-8 mt-4" Elevation="2">
+    <MudText Color="Color.Error" Typo="Typo.h5">Ocorreu um erro</MudText>
+    <MudText Color="Color.Error" Typo="Typo.body1">@ErrorMessage</MudText>
+    <MudButton Class="mt-2"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="@(ErrorBoundary.Recover)">
+        Ok
+    </MudButton>
+</MudPaper>
+
+@code
+{
+    [Parameter] public string ErrorMessage { get; set; } = string.Empty;
+    [Parameter] public ErrorBoundary ErrorBoundary { get; set; } = null!;
+}

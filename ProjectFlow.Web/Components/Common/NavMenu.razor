@@ -1,0 +1,38 @@
+﻿@using ProjectFlow.Core.Extension
+@using ProjectFlow.Web.Security
+<Logo Width="100" />
+
+<MudNavMenu Bordered="true">
+    <MudText Align="Align.Center" Typo="Typo.h6" Class="px-4">Project Flow</MudText>
+    <MudDivider Class="my-2" />
+    <div class="d-flex">
+        <MudIcon Icon="@Icons.Material.Filled.Person" Class="ml-4"></MudIcon>
+        <MudText Typo="Typo.body1" Class="px-4">@GivenName</MudText>
+    </div>
+    <MudDivider Class="my-2" />
+    <MudNavLink Icon="@Icons.Material.Filled.Dashboard" Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Person" Href="/clientes" Match="NavLinkMatch.All">Clientes</MudNavLink>
+    <MudNavGroup Icon="@Icons.Material.Filled.DeveloperBoard" Title="Desenvolvedores" Expanded="true">
+        <MudNavLink Icon="@Icons.Material.Filled.DeveloperBoard" Href="/desenvolvedores/adicionar" Match="NavLinkMatch.All">Cadastro</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.DeveloperBoard" Href="/desenvolvedores" Match="NavLinkMatch.All">Listar</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Icon="@Icons.Material.Filled.Domain" Title="Projetos" Expanded="true">
+        <MudNavLink Icon="@Icons.Material.Filled.DomainAdd" Href="/projetos/adicionar" Match="NavLinkMatch.All">Cadastro</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.Domain" Href="/projetos" Match="NavLinkMatch.All">Listar</MudNavLink>
+    </MudNavGroup>
+    <MudNavLink Icon="@Icons.Material.Filled.Settings" Href="/configuracoes" Match="NavLinkMatch.All">Configurações</MudNavLink>
+</MudNavMenu>
+
+@code
+{
+    public string? GivenName { get; set; } = string.Empty;
+
+    [Inject] public IJwtAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        GivenName = authState.User.GivenName();
+        await base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,137 @@
+﻿@using Blazored.LocalStorage
+@using ProjectFlow.Web.Pages
+@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="_mudThemeProvider"
+                  @bind-IsDarkMode="IsDarkMode"
+                  Theme="Configuration.Theme" />
+<MudSnackbarProvider />
+<MudDialogProvider />
+<MudPopoverProvider />
+
+<AuthorizeView>
+    <Authorized>
+        <MudLayout>
+            <CascadingValue Value="Configuration.SrcLogo" Name="LogoCascading">
+                <MudAppBar>
+                    <MudTooltip Text="Abir/Fechar Menu de Navegação">
+                        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                                       Color="Color.Inherit"
+                                       Edge="Edge.Start"
+                                       OnClick="ToggleDrawer" />
+                    </MudTooltip>
+                    Project Flow
+                    <MudSpacer />
+                    <MudTooltip Text="Mudar tema">
+                        <MudSwitch Color="Color.Inherit"
+                                   Value="IsDarkMode"
+                                   ValueChanged="OnThemeToggled"
+                                   T="bool"
+                                   ThumbIcon="@Icons.Material.TwoTone.DarkMode"
+                                   Class="ma-4"
+                                   Disabled="DisableMudSwitch" />
+                    </MudTooltip>
+
+                    <MudTooltip Text="Logout">
+                        <MudIconButton Icon="@Icons.Material.Filled.Logout"
+                                       Color="Color.Inherit"
+                                       Edge="Edge.Start"
+                                       OnClick="LogoutAsync" />
+                    </MudTooltip>
+                </MudAppBar>
+                <MudDrawer @bind-Open="@_isDrawerOpened">
+                    <NavMenu @key="MudNavMenuKey" />
+                </MudDrawer>
+                <MudMainContent>
+                    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+                        <ErrorBoundary @ref="_errorBoundary">
+                            <ChildContent>
+                                @Body
+                            </ChildContent>
+                            <ErrorContent Context="ErrorContext">
+                                <error ErrorMessage="@ErrorContext.Message" ErrorBoundary="_errorBoundary" />
+                            </ErrorContent>
+                        </ErrorBoundary>
+                    </MudContainer>
+                </MudMainContent>
+            </CascadingValue>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        <LoginRedirect />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code
+{
+    public bool SaveState { get; set; }
+    public bool IsDarkMode { get; set; }
+    public bool DisableMudSwitch { get; set; }
+    public bool _isDrawerOpened { get; set; } = true;
+    public int MudNavMenuKey { get; set; }
+    private MudThemeProvider _mudThemeProvider = null!;
+    private ErrorBoundary _errorBoundary = null!;
+
+    [Inject] public NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] public IDialogService DialogService { get; set; } = null!;
+    [Inject] public ILocalStorageService LocalStorage { get; set; } = null!;
+
+    protected override void OnInitialized() => _errorBoundary = new ErrorBoundary();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var storedTheme = await LocalStorage.GetItemAsync<bool?>("themePreference");
+            if (storedTheme.HasValue)
+            {
+                IsDarkMode = storedTheme.Value;
+            }
+            else
+            {
+                IsDarkMode = await _mudThemeProvider.GetSystemPreference();
+            }
+            await LocalStorage.SetItemAsync<bool?>("themePreference", IsDarkMode);
+            StateHasChanged();
+        }
+        MudNavMenuKey++;
+        SaveState = true;
+    }
+
+    private void ToggleDrawer()
+    {
+        _isDrawerOpened = !_isDrawerOpened;
+        SaveState = true;
+    }
+
+    private async Task OnThemeToggled(bool newValue)
+    {
+        IsDarkMode = newValue;
+        if (!SaveState) return;
+        await LocalStorage.SetItemAsync("themePreference", IsDarkMode);
+        StateHasChanged();
+    }
+
+    public void UpdateStatusDark(bool isDarkMode, bool disableMudSwtich)
+    {
+        IsDarkMode = isDarkMode;
+        SaveState = false;
+        DisableMudSwitch = disableMudSwtich;
+        StateHasChanged();
+    }
+
+    public async Task LogoutAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Deseja realmente sair do sistema?" },
+            { "ButtonColor", Color.Error }
+        };
+
+        var dialog = await DialogService.ShowAsync<DialogConfirm>("Confirmação", parameters);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: true }) return;
+        NavigationManager.NavigateTo("/sair");
+    }
+}

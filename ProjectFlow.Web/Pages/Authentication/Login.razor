@@ -1,0 +1,65 @@
+﻿@page "/login"
+@inherits LoginPage
+@layout HeadlessLayout
+
+<PageTitle>ProjectFlow - Entrar</PageTitle>
+
+<MudGrid Justify="Justify.Center">
+    <MudItem lg="4" md="6" xs="12">
+        <MudPaper Class="mud-width-full pa-8" Elevation="2">
+            <Logo Width="100" />
+
+            <EditForm Model="InputModel" OnValidSubmit="OnValidSubmitAsync">
+                <DataAnnotationsValidator />
+                
+                <MudText Class="flex-center justify-center mb-4"
+                         Typo="Typo.h6">
+                    Bem-vindo de volta!
+                </MudText>
+
+                <MudTextField T="string"
+                              Label="E-mail"
+                              InputType="InputType.Email"
+                              @bind-Value="InputModel.Email"
+                              For="@(() => InputModel.Email)"
+                              Class="mb-4"
+                              AdornmentIcon="@Icons.Material.Filled.Email"
+                              Adornment="Adornment.Start" />
+
+                <MudTextField T="string"
+                              Label="Senha"
+                              InputType="InputType.Password"
+                              @bind-Value="InputModel.Password"
+                              For="@(() => InputModel.Password)"
+                              Class="mb-4"
+                              AdornmentIcon="@Icons.Material.Filled.Password"
+                              Adornment="Adornment.Start" />
+
+                <a href="/recuperar-senha" style="color: blue">Esqueci a senha</a>
+
+                <div class="d-flex mt-8">
+                    @if (IsBusy)
+                    {
+                        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Login">
+                            Login
+                        </MudButton>
+                        <MudSpacer />
+                        <MudButton Href="/comecar"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.AppRegistration">
+                            Quero me cadastrar
+                        </MudButton>
+                    }
+                </div>
+            </EditForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>

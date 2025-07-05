@@ -1,0 +1,77 @@
+﻿@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Extension
+@using ProjectFlow.Core.Models.DTOs.Projects.Request
+
+@switch (InputModel.ProjectStatus)
+{
+    case EProjectStatus.Analysis:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.ProjectStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+
+    case EProjectStatus.Development:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.ProjectStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+
+    case EProjectStatus.Validation:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.ProjectStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+
+    case EProjectStatus.Finished:
+        <div @onclick:stopPropagation="true">
+            <MudChip @onclick="OpenSelectStatus" T="Enum" Color="@ChipColor">
+                @InputModel.ProjectStatus.GetDisplayName()
+            </MudChip>
+        </div>
+        break;
+}
+
+@code
+{
+    [Parameter]
+    public ProjectRequest InputModel { get; set; } = null!;
+
+    private Color ChipColor => InputModel.ProjectStatus switch
+    {
+        EProjectStatus.Analysis => Color.Info,
+        EProjectStatus.Development => Color.Primary,
+        EProjectStatus.Validation => Color.Warning,
+        EProjectStatus.Finished => Color.Success,
+        _ => Color.Default
+    };
+
+    [Inject] public IDialogService DialogService { get; set; } = null!;
+
+    private static EProjectStatus Status;
+
+    public async Task OpenSelectStatus(MouseEventArgs e)
+    {
+        Status = InputModel.ProjectStatus;
+        var parameters = new DialogParameters
+        {
+            { "InputModel", InputModel }
+        };
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+        var dialog = await DialogService
+            .ShowAsync<ProjectStatusSelectDialog>("Informe o status do projeto", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: true })
+            InputModel.ProjectStatus = Status;
+    }
+}

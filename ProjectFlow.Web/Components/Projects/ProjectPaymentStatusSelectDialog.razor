@@ -1,0 +1,82 @@
+﻿@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Handlers
+@using ProjectFlow.Core.Models.DTOs.Projects.Request
+
+<MudPaper Class="pa-4">
+    <MudGrid>
+        <MudItem lg="8" md="8" xs="12">
+            <EnumSelect Class="mb-4" TEnum="EPaymentStatus"
+                        Label="Status do pagamento"
+                        @bind-SelectedValue="InputModel.PaymentStatus" />
+        </MudItem>
+
+        <MudItem lg="4" md="4" xs="12">
+            <MudButton Disabled="IsBusy" FullWidth="true"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Save"
+                       OnClick="Save">
+                @if (IsBusy)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Salvando</MudText>
+                }
+                else
+                {
+                    <MudText>Salvar</MudText>
+                }
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public ProjectRequest InputModel { get; set; } = new();
+
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Inject]
+    public IProjectHandler Handler { get; set; } = null!;
+
+    [Inject]
+    public ISnackbar Snackbar { get; set; } = null!;
+
+    public bool IsBusy { get; set; }
+
+    public async Task Save()
+    {
+        IsBusy = true;
+        try
+        {
+            var request = new UpdatePaymentStatusProjectRequest
+            {
+                Id = InputModel.Id,
+                UserId = InputModel.User.Id,
+                PaymentStatus = InputModel.PaymentStatus
+            };
+            var result = await Handler.UpdatePaymentStatusAsync(request);
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Status do pagamento atualizado com sucesso", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add(result.Message ?? string.Empty, Severity.Error);
+                MudDialog.Close(DialogResult.Ok(false));
+            }
+        }
+        catch (Exception e)
+        {
+            Snackbar.Add(e.Message, Severity.Error);
+            MudDialog.Close(DialogResult.Ok(false));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}

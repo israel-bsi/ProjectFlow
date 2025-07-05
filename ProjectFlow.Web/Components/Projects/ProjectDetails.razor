@@ -1,0 +1,158 @@
+﻿@inherits ProjectDetailsComponent
+@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Extension
+
+<MudPaper Class="pa-8">
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">Detalhes do Projeto</MudText>
+                <MudText Color="Color.Primary" Typo="Typo.h6">Id @InputModel.Id</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudTooltip Text="Orçamento">
+                    <MudIconButton Icon="@Icons.Custom.FileFormats.FileExcel"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => ProjectServices.OnBudgetButtonClickAsync(InputModel.Id))">
+                    </MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Editar">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   Href="@($"/projetos/editar/{InputModel.Id}")" />
+                </MudTooltip>
+                <MudTooltip Text="Excluir">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   OnClick="OnDeleteButtonClicked" />
+                </MudTooltip>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudDivider Class="my-2" />
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Título</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.Title</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Solicitante</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.Requester</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Cliente</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.Customer.Name</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Data da solicitação</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.RequestedAt?.ToString("dd/MM/yyyy")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Status do Projeto</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.ProjectStatus.GetDisplayName()</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Color="Color.Primary">Status do Pagamento</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.PaymentStatus.GetDisplayName()</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Desenvolvedores</MudText>
+            <MudDivider Class="my-2" />
+            <MudGrid>
+                @foreach (var developer in InputModel.Developers)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-2">
+                            <MudText Typo="Typo.subtitle2">@developer.Name</MudText>
+                            <MudText Typo="Typo.caption">@developer.DevLevel.GetDisplayName()</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Serviços</MudText>
+            <MudDivider Class="my-2" />
+            <MudGrid>
+                @foreach (var service in InputModel.ProjectServices)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-2">
+                            <MudText Typo="Typo.subtitle2">Descrição: @service.Description</MudText>
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.caption">Horas: @service.Hours</MudText>
+                                <MudText Typo="Typo.caption">Valor: @service.Value.ToString("C")</MudText>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Valores e Prazos</MudText>
+            <MudDivider Class="my-2" />
+            <MudGrid>
+                <MudItem xs="12" sm="3">
+                    <MudText Color="Color.Primary">Horas Totais</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.TotalHours</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudText Color="Color.Primary">Desconto</MudText>
+                    @if (InputModel.DiscountType == EDiscountType.Percentage)
+                    {
+                        <MudText Typo="Typo.subtitle2">@InputModel.DiscountValue %</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.subtitle2">@InputModel.DiscountValue.ToString("C")</MudText>
+                    }
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudText Color="Color.Primary">Valor Total</MudText>
+                    <MudText Typo="Typo.subtitle2">@InputModel.TotalValue.ToString("C")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudText Color="Color.Primary">Prazo de Entrega</MudText>
+                    @if (InputModel.DevelopmentStart is not null)
+                    {
+                        <MudText Typo="Typo.subtitle2">
+                          Prazo de conclusão: @InputModel.DevelopmentStart.Value.AddDays(AppSettings.DaysToAddOnFinishedDate).ToString("dd/MM/yyyy")
+                        </MudText>
+                    }
+                    <MudTooltip Text="A contar a partir da data do 1° pagamento">
+                        <MudText Typo="Typo.subtitle2">Prazo estimado: @(Math.Ceiling((double)InputModel.TotalHours / 2)) dias úteis</MudText>
+                    </MudTooltip>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Comissões</MudText>
+            <MudDivider Class="my-2" />
+            <MudGrid>
+                @foreach (var commission in CommissionResponse.Commission)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-2">
+                            <MudText Typo="Typo.subtitle2">@commission.DeveloperName</MudText>
+                            <MudText Typo="Typo.subtitle2">@commission.CommissionValue.ToString("C")</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudPaper>

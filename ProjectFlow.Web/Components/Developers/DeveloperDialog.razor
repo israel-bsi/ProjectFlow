@@ -1,0 +1,33 @@
+﻿@using ProjectFlow.Core.Models.DTOs.Developers.Request
+@using ProjectFlow.Web.Pages.Developers
+
+<MudDialog>
+    <DialogContent>
+        <List OnDevelopersSelected="SelectDevelopers"
+              MultiSelection="true"
+              ShowActions="false"
+              ShowConfirmButton="true" 
+              RowStyle="cursor: pointer" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog" Color="Color.Primary">Fechar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<HashSet<DeveloperRequest>> OnDevelopersSelected { get; set; }
+
+    void CloseDialog() => MudDialog.Close();
+
+    public async Task SelectDevelopers(HashSet<DeveloperRequest> developers)
+    {
+        if (OnDevelopersSelected.HasDelegate)
+            await OnDevelopersSelected.InvokeAsync(developers);
+
+        MudDialog.Close(DialogResult.Ok(developers));
+    }
+}

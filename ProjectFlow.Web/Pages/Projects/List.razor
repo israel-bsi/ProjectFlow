@@ -1,0 +1,155 @@
+﻿@page "/projetos"
+@using ProjectFlow.Core.Enums
+@using ProjectFlow.Core.Models.DTOs.Filter
+@using ProjectFlow.Core.Models.DTOs.Projects.Request
+@inherits ListProjectsPage
+
+<MudText Typo="Typo.h4">Projetos</MudText>
+
+<PageTitle>Projetos</PageTitle>
+
+<div class="d-flex justify-end">
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.AddHome"
+               Href="/projetos/adicionar">
+        Novo projeto
+    </MudButton>
+</div>
+
+<MudDataGrid T="ProjectRequest"
+             Class="mt-4"
+             ServerData="LoadServerData"
+             @ref="DataGrid"
+             RowsPerPage="@Core.Configuration.DefaultPageSize"
+             RowClick="@(e => SelectProject(e.Item))"
+             RowStyle="cursor: pointer">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Projetos</MudText>
+        <MudSpacer />
+        <MudSelect T="FilterOption"
+                   Label="Selecione o filtro"
+                   Value="SelectedFilter"
+                   ValueChanged="OnValueFilterChanged"
+                   Class="me-2 mb-4">
+            @foreach (var option in FilterOptions)
+            {
+                <MudSelectItem Value="@option">@option.DisplayName</MudSelectItem>
+            }
+        </MudSelect>
+        @if (ShowMudSelectStatus)
+        {
+            <EnumSelect Class="mb-4" 
+                        TEnum="EProjectStatus" 
+                        Label="Status do projeto"
+                        SelectedValue="InputModel.ProjectStatus"
+                        SelectedValueChanged="OnMudSelectStatusChanged">
+            </EnumSelect>
+        }
+        else if (ShowMudSelectPaymentStatus)
+        {
+            <EnumSelect Class="mb-4" 
+                        TEnum="EPaymentStatus"
+                        Label="Status do pagamento"
+                        SelectedValue="InputModel.PaymentStatus"
+                        SelectedValueChanged="OnMudSelectPaymentStatusChanged">
+            </EnumSelect>
+        }
+        else
+        {
+            <MudTextField @bind-Value="SearchTerm"
+                          Placeholder="Filtrar..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Class="me-2">
+            </MudTextField>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.Search"
+                   OnClick="OnButtonSearchClick"
+                   ButtonType="ButtonType.Button"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled" 
+                   Class="mr-2">
+            Pesquisar
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Clear"
+                   OnClick="OnClearSearchClick"
+                   ButtonType="ButtonType.Button"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled">
+            Limpar
+        </MudButton>
+       
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x=>x.Id" Title="Id"></PropertyColumn>
+        <PropertyColumn Property="x=>x.Title" Title="Título"></PropertyColumn>
+        <PropertyColumn Property="x=>x.Customer.Name" Title="Cliente"></PropertyColumn>
+        <TemplateColumn Title="Prazo de conclusão">
+            <CellTemplate>
+                @if (@context.Item.DevelopmentStart is not null)
+                {
+                    @context.Item.DevelopmentStart.Value.AddDays(AppSettingsRequest.DaysToAddOnFinishedDate).ToString("dd/MM/yyyy")
+                }
+                else
+                {
+                    <MudText>-</MudText>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Valor" CellClass="text-nowrap">
+            <CellTemplate>
+                @context.Item.TotalValue.ToString("C")
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Desenvolvedores">
+            <CellTemplate>
+                @GetDevelopersName(context.Item)
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Status">
+            <CellTemplate>
+                <ProjectStatus InputModel="@context.Item"  />
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Pagamento">
+            <CellTemplate>
+                <PaymentStatus InputModel="@context.Item" />
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Class="justify-end" Title="Ações">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudTooltip Text="Orçamento">
+                        <MudIconButton Icon="@Icons.Custom.FileFormats.FileExcel"
+                                       Color="Color.Primary"
+                                       OnClick="@(() => ProjectServices.OnBudgetButtonClickAsync(context.Item.Id))">
+                        </MudIconButton>
+                    </MudTooltip>
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Href="@($"/projetos/editar/{context.Item.Id}")"
+                                       Color="Color.Primary">
+                        </MudIconButton>
+                    </MudTooltip>
+                    <MudTooltip Text="Excluir">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       OnClick="() => OnDeleteButtonClickedAsync(context.Item)">
+                        </MudIconButton>
+                    </MudTooltip>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ProjectRequest" />
+    </PagerContent>
+</MudDataGrid>
+
+<style>
+    .text-nowrap {
+        white-space: nowrap;
+    }
+</style>

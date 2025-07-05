@@ -1,0 +1,22 @@
+﻿@page "/sair"
+@inherits LogoutPage
+@layout HeadlessLayout
+
+<PageTitle>ProjectFlow - Sair</PageTitle>
+
+<MudText Typo="Typo.h3">Finalizando Sessão...</MudText>
+
+<MudPaper Class="pa-8 mt-4">
+    <Logo Width="100" />
+
+    <MudAlert Severity="Severity.Info">
+        <div>
+            Sessão Finalizada... 
+            <MudButton Variant="Variant.Text"
+                       Href="/login" 
+                       StartIcon="@Icons.Material.Filled.Login">
+                Ir para a página de login
+            </MudButton>
+        </div>
+    </MudAlert>
+</MudPaper>
